@@ -158,18 +158,21 @@ export const defaultLandingContent: Omit<LandingContent, "updatedAt"> = {
 			title: "Fácil de Usar",
 			description: "Interfaz intuitiva diseñada para todos",
 			icon: "🚀",
+			slug: "facil-de-usar",
 		},
 		{
 			id: "2",
 			title: "Rápido y Confiable",
 			description: "Rendimiento optimizado garantizado",
 			icon: "⚡",
+			slug: "rapido-confiable",
 		},
 		{
 			id: "3",
 			title: "Soporte 24/7",
 			description: "Siempre disponibles para ayudarte",
 			icon: "💬",
+			slug: "soporte-24-7",
 		},
 	],
 	products: {

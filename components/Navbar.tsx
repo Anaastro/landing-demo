@@ -58,7 +58,7 @@ export default function Navbar({ logo }: NavbarProps) {
 			<motion.nav
 				initial={{ y: -100 }}
 				animate={{ y: 0 }}
-				className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50"
+				className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50"
 			>
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="flex items-center justify-between h-16 sm:h-20">
@@ -170,7 +170,7 @@ export default function Navbar({ logo }: NavbarProps) {
 								animate={{ opacity: 1 }}
 								exit={{ opacity: 0 }}
 								onClick={closeMobileMenu}
-								className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+								className="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 md:hidden"
 							/>
 
 							<motion.div
@@ -178,7 +178,7 @@ export default function Navbar({ logo }: NavbarProps) {
 								animate={{ x: 0 }}
 								exit={{ x: "100%" }}
 								transition={{ type: "spring", damping: 25, stiffness: 200 }}
-								className="fixed top-16 sm:top-20 right-0 bottom-0 w-full max-w-sm bg-background border-l border-border z-50 overflow-y-auto md:hidden shadow-2xl"
+								className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-background border-l border-border z-70 overflow-y-auto md:hidden shadow-2xl pt-24"
 							>
 								<div className="px-6 py-8 space-y-2">
 									<Link

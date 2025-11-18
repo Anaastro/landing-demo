@@ -2,8 +2,10 @@
 
 import { Feature } from "@/lib/types";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Zap } from "lucide-react";
+import { Zap, ArrowRight } from "lucide-react";
+import RichTextViewer from "./RichTextViewer";
 
 interface FeaturesProps {
 	features: Feature[];
@@ -55,42 +57,52 @@ export default function Features({ features }: FeaturesProps) {
 					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
 				>
 					{features.map((feature, index) => (
-						<motion.div
-							key={feature.id}
-							variants={item}
-							whileHover={{ y: -8, transition: { duration: 0.3 } }}
-							className="group relative bg-card dark:bg-card rounded-2xl shadow-modern p-8 border border-border/50 dark:border-border hover:border-primary/50 transition-all duration-300 overflow-hidden"
-						>
-							{/* Efecto de brillo al hover */}
-							<div className="absolute inset-0 bg-linear-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />{" "}
-							<div className="relative z-10">
-								{feature.imageUrl ? (
-									<div className="relative h-48 mb-6 rounded-xl overflow-hidden">
-										<Image
-											src={feature.imageUrl}
-											alt={feature.title}
-											fill
-											className="object-cover group-hover:scale-110 transition-transform duration-500"
-										/>
-									</div>
-								) : (
-									<div className="flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-linear-to-br from-primary to-secondary text-white text-4xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-										{feature.icon}
-									</div>
-								)}
+						<motion.div key={feature.id} variants={item}>
+							<Link href={`/feature/${feature.slug}`}>
+								<motion.div
+									whileHover={{ y: -8, transition: { duration: 0.3 } }}
+									className="group relative bg-card dark:bg-card rounded-2xl shadow-modern p-8 border border-border/50 dark:border-border hover:border-primary/50 transition-all duration-300 overflow-hidden cursor-pointer h-full"
+								>
+									{/* Efecto de brillo al hover */}
+									<div className="absolute inset-0 bg-linear-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-								<h3 className="text-2xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors">
-									{feature.title}
-								</h3>
-								<p className="text-foreground/70 dark:text-foreground/80 leading-relaxed">
-									{feature.description}
-								</p>
+									<div className="relative z-10">
+										{feature.imageUrl ? (
+											<div className="relative h-48 mb-6 rounded-xl overflow-hidden">
+												<Image
+													src={feature.imageUrl}
+													alt={feature.title}
+													fill
+													className="object-cover group-hover:scale-110 transition-transform duration-500"
+												/>
+											</div>
+										) : (
+											<div className="flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-linear-to-br from-primary to-secondary text-white text-4xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+												{feature.icon}
+											</div>
+										)}
 
-								{/* Número de feature */}
-								<div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-									{index + 1}
-								</div>
-							</div>
+										<h3 className="text-2xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors">
+											{feature.title}
+										</h3>
+
+										<div className="text-foreground/70 dark:text-foreground/80 leading-relaxed mb-4">
+											<RichTextViewer content={feature.description} />
+										</div>
+
+										{/* Link para ver más */}
+										<div className="flex items-center gap-2 text-primary font-semibold text-sm group-hover:gap-3 transition-all">
+											Ver detalles
+											<ArrowRight className="w-4 h-4" />
+										</div>
+
+										{/* Número de feature */}
+										<div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+											{index + 1}
+										</div>
+									</div>
+								</motion.div>
+							</Link>
 						</motion.div>
 					))}
 				</motion.div>

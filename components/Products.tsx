@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ProductsSection } from "@/lib/types";
 import { Check, Sparkles } from "lucide-react";
+import RichTextViewer from "./RichTextViewer";
 
 interface ProductsProps {
 	products: ProductsSection;
@@ -120,15 +121,13 @@ export default function Products({ products }: ProductsProps) {
 											/>
 										</div>
 									)}
-
 									{/* Nombre y descripción */}
 									<h3 className="text-2xl font-bold mb-2 text-card-foreground">
 										{product.name}
 									</h3>
-									<p className="text-muted-foreground mb-6">
-										{product.description}
-									</p>
-
+									<div className="text-muted-foreground mb-6">
+										<RichTextViewer content={product.description} />
+									</div>{" "}
 									{/* Precio */}
 									<div className="mb-8">
 										<div
@@ -141,7 +140,6 @@ export default function Products({ products }: ProductsProps) {
 											{product.price}
 										</div>
 									</div>
-
 									{/* Características */}
 									<ul className="space-y-4 mb-8">
 										{product.features.map((feature, index) => (
@@ -170,7 +168,6 @@ export default function Products({ products }: ProductsProps) {
 											</motion.li>
 										))}
 									</ul>
-
 									{/* Botón de acción */}
 									{product.whatsapp?.enabled && product.whatsapp.phoneNumber ? (
 										<a

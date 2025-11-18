@@ -4,6 +4,7 @@ import { BannerContent } from "@/lib/types";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import RichTextViewer from "./RichTextViewer";
 
 interface BannerProps {
 	content: BannerContent;
@@ -65,14 +66,14 @@ export default function Banner({ content }: BannerProps) {
 				>
 					{content.title}
 				</motion.h1>
-				<motion.p
+				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.4 }}
 					className="text-base sm:text-xl md:text-2xl mb-8 sm:mb-10 max-w-3xl mx-auto text-foreground/80 dark:text-white/90 leading-relaxed px-2"
 				>
-					{content.subtitle}
-				</motion.p>
+					<RichTextViewer content={content.subtitle} />
+				</motion.div>
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={{ opacity: 1, y: 0 }}

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Testimonial } from "@/lib/types";
 import { Quote, Star } from "lucide-react";
+import RichTextViewer from "./RichTextViewer";
 
 interface TestimonialsProps {
 	testimonials: Testimonial[];
@@ -112,12 +113,10 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
 											/>
 										))}
 									</div>
-
 									{/* Contenido del testimonio */}
-									<p className="text-muted-foreground leading-relaxed mb-6 text-base">
-										&ldquo;{testimonial.content}&rdquo;
-									</p>
-
+									<div className="text-muted-foreground leading-relaxed mb-6 text-base">
+										<RichTextViewer content={testimonial.content} />
+									</div>{" "}
 									{/* Información del cliente */}
 									<div className="flex items-center gap-4">
 										{testimonial.avatarUrl ? (

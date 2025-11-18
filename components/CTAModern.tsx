@@ -4,6 +4,7 @@ import { CTASection } from "@/lib/types";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, Rocket } from "lucide-react";
+import RichTextViewer from "./RichTextViewer";
 
 interface CTAProps {
 	content: CTASection;
@@ -71,15 +72,12 @@ export default function CTAModern({ content }: CTAProps) {
 						<Rocket className="w-4 h-4" />
 						<span className="text-sm font-semibold">COMIENZA HOY</span>
 					</div>
-
 					<h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
 						{content.title}
 					</h2>
-
-					<p className="text-xl md:text-2xl text-white/95 mb-10 leading-relaxed">
-						{content.description}
-					</p>
-
+					<div className="text-xl md:text-2xl text-white/95 mb-10 leading-relaxed">
+						<RichTextViewer content={content.description} />
+					</div>{" "}
 					<motion.a
 						href={content.buttonLink}
 						whileHover={{ scale: 1.05 }}
@@ -89,7 +87,6 @@ export default function CTAModern({ content }: CTAProps) {
 						{content.buttonText}
 						<ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
 					</motion.a>
-
 					<p className="mt-8 text-white/80 text-sm">
 						✓ Sin tarjeta de crédito requerida · ✓ Soporte 24/7 · ✓ Cancelación
 						gratuita
