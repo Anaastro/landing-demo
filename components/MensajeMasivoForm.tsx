@@ -76,7 +76,6 @@ const guardarLogMensajeWhatsapp = async (log: MensajeWhatsappLog) => {
 			cleanContent.fileName = log.content.fileName;
 		}
 
-		// Crear objeto limpio sin undefined
 		const cleanLog: {
 			toNumber: string;
 			telefonoSinPlus: string;
@@ -100,7 +99,6 @@ const guardarLogMensajeWhatsapp = async (log: MensajeWhatsappLog) => {
 			createdAt: serverTimestamp(),
 		};
 
-		// Solo agregar errorMessage si existe
 		if (log.errorMessage !== undefined && log.errorMessage !== null) {
 			cleanLog.errorMessage = log.errorMessage;
 		}
@@ -181,10 +179,10 @@ const sanitizeName = (name: string) =>
 
 /* ===== Props ===== */
 type Props = {
-	contactosSeleccionados: Contacto[]; // a quiénes enviarás
-	onStatusesChange: React.Dispatch<React.SetStateAction<EnvioStatus[]>>; // usa setStatusEnvios del padre
-	onFinish?: () => void; // opcional al terminar
-	initialDelay?: number; // default 3
+	contactosSeleccionados: Contacto[];
+	onStatusesChange: React.Dispatch<React.SetStateAction<EnvioStatus[]>>;
+	onFinish?: () => void;
+	initialDelay?: number;
 };
 
 export default function MensajeMasivoForm({
@@ -193,9 +191,7 @@ export default function MensajeMasivoForm({
 	onFinish,
 	initialDelay = 3,
 }: Props) {
-	// caption
 	const [mensaje, setMensaje] = useState("");
-	// media
 	const [mediaFile, setMediaFile] = useState<File | null>(null);
 	const [mediaUrl, setMediaUrl] = useState("");
 	const [mediaInfo, setMediaInfo] = useState<{
@@ -204,15 +200,12 @@ export default function MensajeMasivoForm({
 	} | null>(null);
 	const [objectPreview, setObjectPreview] = useState<string | null>(null);
 
-	// upload a storage
 	const [uploading, setUploading] = useState(false);
 	const [uploadProgress, setUploadProgress] = useState(0);
 
-	// delay + envío
 	const [delay, setDelay] = useState(initialDelay);
 	const [enviando, setEnviando] = useState(false);
 
-	// inferencias
 	const inferredType: MessageType = useMemo(() => {
 		if (mediaFile) return messageTypeFromMime(mediaFile.type || undefined);
 		if (mediaUrl.trim())
@@ -337,7 +330,6 @@ export default function MensajeMasivoForm({
 
 		setEnviando(true);
 
-		// preparar status base
 		onStatusesChange(
 			contactosSeleccionados.map((c) => ({
 				telefono: c.telefono,
@@ -356,7 +348,6 @@ export default function MensajeMasivoForm({
 			return;
 		}
 
-		// subir archivo una sola vez (si hay)
 		let sharedMediaUrl: string | null = null;
 		if (mediaFile) {
 			try {
@@ -376,7 +367,6 @@ export default function MensajeMasivoForm({
 			sharedMediaUrl = mediaUrl.trim();
 		}
 
-		// envío secuencial con delay
 		for (let i = 0; i < contactosSeleccionados.length; i++) {
 			const contacto = contactosSeleccionados[i];
 			const mensajePersonalizado = reemplazarVariables(mensaje, contacto);
@@ -391,7 +381,6 @@ export default function MensajeMasivoForm({
 				? contacto.telefono
 				: `+${contacto.telefono}`;
 
-			// preparamos content una sola vez para usarlo en el fetch y en el log
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const content: any = {};
 			if (mensajePersonalizado) content.text = mensajePersonalizado;
@@ -432,7 +421,6 @@ export default function MensajeMasivoForm({
 						)
 					);
 
-					// ✅ Guardar log exitoso
 					await guardarLogMensajeWhatsapp({
 						toNumber,
 						telefonoSinPlus: contacto.telefono,
@@ -461,7 +449,6 @@ export default function MensajeMasivoForm({
 						)
 					);
 
-					// ❌ Guardar log con error de API
 					await guardarLogMensajeWhatsapp({
 						toNumber,
 						telefonoSinPlus: contacto.telefono,
@@ -491,7 +478,6 @@ export default function MensajeMasivoForm({
 					)
 				);
 
-				// ❌ Guardar log con error de conexión
 				await guardarLogMensajeWhatsapp({
 					toNumber,
 					telefonoSinPlus: contacto.telefono,
@@ -532,13 +518,17 @@ export default function MensajeMasivoForm({
 				<img
 					src={src}
 					alt={inferredFileName || "preview"}
-					className="max-h-40 rounded-lg border object-contain"
+					className="max-h-40 rounded-lg border object-contain border-gray-200 dark:border-slate-700"
 				/>
 			);
 		}
 		if (type === "video") {
 			return (
-				<video src={src} controls className="max-h-40 rounded-lg border" />
+				<video
+					src={src}
+					controls
+					className="max-h-40 rounded-lg border border-gray-200 dark:border-slate-700"
+				/>
 			);
 		}
 		if (type === "audio") {
@@ -546,12 +536,12 @@ export default function MensajeMasivoForm({
 		}
 		return (
 			<div className="flex items-center gap-3">
-				<FileText className="w-6 h-6 text-gray-700" />
+				<FileText className="w-6 h-6 text-gray-700 dark:text-gray-200" />
 				<div className="text-sm">
-					<p className="font-semibold text-gray-800">
+					<p className="font-semibold text-gray-800 dark:text-gray-100">
 						{inferredFileName || "documento"}
 					</p>
-					<p className="text-xs text-gray-500">
+					<p className="text-xs text-gray-500 dark:text-gray-400">
 						{inferredMime || "application/octet-stream"}
 					</p>
 				</div>
@@ -565,8 +555,8 @@ export default function MensajeMasivoForm({
 	return (
 		<>
 			{/* Texto / Caption */}
-			<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-				<label className="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+			<div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-slate-700">
+				<label className="block text-sm font-bold text-gray-700 dark:text-gray-100 mb-3 flex items-center gap-2">
 					<MessageSquare className="w-5 h-5" />
 					Texto / Caption (opcional)
 				</label>
@@ -575,14 +565,14 @@ export default function MensajeMasivoForm({
 					onChange={(e) => setMensaje(e.target.value)}
 					placeholder="Escribe el caption (opcional). Variables: {nombre}, {apellido}, {nombreCompleto}"
 					rows={8}
-					className="w-full p-4 border-2 border-gray-300 rounded-xl shadow-sm focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none resize-none"
+					className="w-full p-4 border-2 border-gray-300 dark:border-slate-600 rounded-xl shadow-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none resize-none"
 				/>
 				{mensaje && contactosSeleccionados[0] && (
-					<div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-4">
-						<p className="text-xs font-bold text-gray-600 mb-2">
+					<div className="mt-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+						<p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-2">
 							Vista previa (primer contacto):
 						</p>
-						<p className="text-sm text-gray-800 whitespace-pre-wrap">
+						<p className="text-sm text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
 							{mensaje
 								.replace(/{nombre}/g, contactosSeleccionados[0].nombre)
 								.replace(/{apellido}/g, contactosSeleccionados[0].apellido)
@@ -596,14 +586,14 @@ export default function MensajeMasivoForm({
 			</div>
 
 			{/* Adjuntar archivo o URL */}
-			<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-				<label className="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+			<div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-slate-700">
+				<label className="block text-sm font-bold text-gray-700 dark:text-gray-100 mb-3 flex items-center gap-2">
 					<Paperclip className="w-5 h-5" />
 					Adjuntar archivo o URL
 				</label>
 
 				<div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-					<label className="inline-flex items-center justify-center px-4 py-2 rounded-xl font-bold shadow border-2 border-gray-300 hover:border-gray-400 cursor-pointer">
+					<label className="inline-flex items-center justify-center px-4 py-2 rounded-xl font-bold shadow border-2 border-gray-300 dark:border-slate-600 hover:border-gray-400 dark:hover:border-slate-400 cursor-pointer bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100">
 						<input
 							type="file"
 							accept={acceptAll}
@@ -636,7 +626,7 @@ export default function MensajeMasivoForm({
 								setMediaInfo(null);
 							}
 						}}
-						className="w-full p-3 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none"
+						className="w-full p-3 border-2 border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none"
 						disabled={enviando}
 					/>
 
@@ -651,7 +641,7 @@ export default function MensajeMasivoForm({
 									setObjectPreview(null);
 								}
 							}}
-							className="px-3 py-2 rounded-xl font-bold text-red-600 hover:bg-red-50 flex items-center gap-2"
+							className="px-3 py-2 rounded-xl font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/40 flex items-center gap-2"
 							type="button"
 							disabled={enviando}
 						>
@@ -662,38 +652,38 @@ export default function MensajeMasivoForm({
 
 				{uploading && (
 					<div className="mt-3">
-						<div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+						<div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
 							<div
 								className="h-3 rounded-full transition-all bg-green-600"
 								style={{ width: `${uploadProgress}%` }}
 							/>
 						</div>
-						<p className="text-xs text-gray-600 mt-1">
+						<p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
 							Subiendo a Firebase Storage... {uploadProgress}%
 						</p>
 					</div>
 				)}
 
 				{(mediaFile || mediaUrl) && (
-					<div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center justify-between">
+					<div className="mt-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between">
 						<div className="flex items-center gap-3">
 							{inferredType === "image" && (
-								<ImageIcon className="w-5 h-5 text-gray-600" />
+								<ImageIcon className="w-5 h-5 text-gray-600 dark:text-gray-200" />
 							)}
 							{inferredType === "video" && (
-								<Video className="w-5 h-5 text-gray-600" />
+								<Video className="w-5 h-5 text-gray-600 dark:text-gray-200" />
 							)}
 							{inferredType === "audio" && (
-								<Music2 className="w-5 h-5 text-gray-600" />
+								<Music2 className="w-5 h-5 text-gray-600 dark:text-gray-200" />
 							)}
 							{inferredType === "document" && (
-								<FileText className="w-5 h-5 text-gray-600" />
+								<FileText className="w-5 h-5 text-gray-600 dark:text-gray-200" />
 							)}
 							<div>
-								<p className="text-sm font-bold text-gray-800">
+								<p className="text-sm font-bold text-gray-800 dark:text-gray-100">
 									{mediaFile ? mediaInfo?.name : inferredFileName || "archivo"}
 								</p>
-								<p className="text-xs text-gray-600">
+								<p className="text-xs text-gray-600 dark:text-gray-300">
 									{mediaFile ? mediaInfo?.type : inferredMime || "desconocido"}
 								</p>
 							</div>
@@ -705,15 +695,15 @@ export default function MensajeMasivoForm({
 					<div className="mt-4">{renderPreview()}</div>
 				)}
 
-				<p className="text-xs text-gray-500 mt-2">
+				<p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
 					Se enviará como <strong>{inferredType}</strong>. El texto se incluye
 					como <em>content.text</em> (caption).
 				</p>
 			</div>
 
 			{/* Delay */}
-			<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-				<label className="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+			<div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-slate-700">
+				<label className="block text-sm font-bold text-gray-700 dark:text-gray-100 mb-3 flex items-center gap-2">
 					<Clock className="w-5 h-5" />
 					Delay entre mensajes
 				</label>
@@ -727,11 +717,11 @@ export default function MensajeMasivoForm({
 						className="flex-1"
 						disabled={enviando}
 					/>
-					<span className="text-2xl font-black text-gray-800 min-w-[80px]">
+					<span className="text-2xl font-black text-gray-800 dark:text-gray-100 min-w-[80px]">
 						{delay}s
 					</span>
 				</div>
-				<p className="text-xs text-gray-500 mt-2">
+				<p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
 					Tiempo de espera entre cada mensaje para evitar spam.
 				</p>
 			</div>

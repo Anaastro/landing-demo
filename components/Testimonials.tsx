@@ -33,7 +33,7 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
 	};
 
 	return (
-		<section className="relative py-32 overflow-hidden">
+		<section className="relative py-32 overflow-hidden" id="testimonials">
 			{/* Fondo con gradiente */}
 			<div className="absolute inset-0 bg-linear-to-b from-background via-muted/30 to-background" />
 
