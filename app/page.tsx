@@ -9,6 +9,7 @@ import Features from "@/components/Features";
 import Products from "@/components/Products";
 import Testimonials from "@/components/Testimonials";
 import CTAModern from "@/components/CTAModern";
+import ContactForm from "@/components/ContactForm";
 import FooterModern from "@/components/FooterModern";
 import {
 	getLandingContent,
@@ -110,6 +111,7 @@ export default function Home() {
 			<Products products={content.products} />
 			<Testimonials testimonials={content.testimonials} />
 			<CTAModern content={content.cta} />
+			{content.contactForm && <ContactForm config={content.contactForm} />}
 			<FooterModern content={content.footer} />
 		</div>
 	);

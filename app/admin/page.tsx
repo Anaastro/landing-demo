@@ -10,6 +10,8 @@ import {
 import { LandingContent, Feature, Testimonial, Product } from "@/lib/types";
 import AdminLayout from "@/components/AdminLayout";
 import MensajesMasivos from "@/components/MensajesMasivos";
+import ContactSubmissions from "@/components/ContactSubmissions";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import {
 	Upload,
 	Save,
@@ -19,7 +21,7 @@ import {
 	AlertCircle,
 } from "lucide-react";
 
-export default function AdminPage() {
+function AdminPageContent() {
 	const [content, setContent] = useState<LandingContent | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
@@ -1440,8 +1442,415 @@ export default function AdminPage() {
 				</motion.section>
 			)}
 
+			{/* Sección: Formulario de Contacto */}
+			{currentSection === "contactForm" && content && (
+				<motion.section
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.5 }}
+					className="bg-card dark:bg-card rounded-3xl p-8 shadow-modern border border-border/50"
+				>
+					<h2 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-linear-to-r from-primary to-secondary">
+						Configuración del Formulario de Contacto
+					</h2>
+
+					<div className="space-y-8">
+						{/* Toggle Enabled */}
+						<div className="flex items-center gap-3">
+							<input
+								type="checkbox"
+								checked={content.contactForm?.enabled || false}
+								onChange={(e) => {
+									if (!content.contactForm) return;
+									setContent({
+										...content,
+										contactForm: {
+											...content.contactForm,
+											enabled: e.target.checked,
+										},
+									});
+								}}
+								className="w-5 h-5 rounded border-border"
+							/>
+							<label className="text-sm font-medium">
+								Mostrar formulario de contacto
+							</label>
+						</div>
+
+						{content.contactForm && (
+							<>
+								{/* Título */}
+								<div>
+									<label className="block text-sm font-medium mb-2">
+										Título
+									</label>
+									<input
+										type="text"
+										value={content.contactForm.title}
+										onChange={(e) =>
+											setContent({
+												...content,
+												contactForm: {
+													...content.contactForm!,
+													title: e.target.value,
+												},
+											})
+										}
+										className="w-full px-4 py-3 rounded-xl border border-border bg-background"
+									/>
+								</div>
+
+								{/* Subtítulo */}
+								<div>
+									<label className="block text-sm font-medium mb-2">
+										Subtítulo
+									</label>
+									<textarea
+										value={content.contactForm.subtitle}
+										onChange={(e) =>
+											setContent({
+												...content,
+												contactForm: {
+													...content.contactForm!,
+													subtitle: e.target.value,
+												},
+											})
+										}
+										rows={2}
+										className="w-full px-4 py-3 rounded-xl border border-border bg-background"
+									/>
+								</div>
+
+								{/* Texto del Botón */}
+								<div>
+									<label className="block text-sm font-medium mb-2">
+										Texto del Botón
+									</label>
+									<input
+										type="text"
+										value={content.contactForm.buttonText}
+										onChange={(e) =>
+											setContent({
+												...content,
+												contactForm: {
+													...content.contactForm!,
+													buttonText: e.target.value,
+												},
+											})
+										}
+										className="w-full px-4 py-3 rounded-xl border border-border bg-background"
+									/>
+								</div>
+
+								{/* Mensaje de Éxito */}
+								<div>
+									<label className="block text-sm font-medium mb-2">
+										Mensaje de Éxito
+									</label>
+									<textarea
+										value={content.contactForm.successMessage}
+										onChange={(e) =>
+											setContent({
+												...content,
+												contactForm: {
+													...content.contactForm!,
+													successMessage: e.target.value,
+												},
+											})
+										}
+										rows={2}
+										className="w-full px-4 py-3 rounded-xl border border-border bg-background"
+									/>
+								</div>
+
+								{/* Campos del Formulario */}
+								<div>
+									<div className="flex items-center justify-between mb-4">
+										<label className="text-sm font-medium">
+											Campos del Formulario
+										</label>
+										<button
+											onClick={() => {
+												const newField = {
+													id: Date.now().toString(),
+													name: "nuevo_campo",
+													label: "Nuevo Campo",
+													type: "text" as const,
+													placeholder: "",
+													required: false,
+													order: content.contactForm!.fields.length + 1,
+												};
+												setContent({
+													...content,
+													contactForm: {
+														...content.contactForm!,
+														fields: [...content.contactForm!.fields, newField],
+													},
+												});
+											}}
+											className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:scale-105 transition-transform"
+										>
+											<Plus className="w-4 h-4" />
+											Agregar Campo
+										</button>
+									</div>
+
+									<div className="space-y-4">
+										{content.contactForm.fields.map((field, index) => (
+											<div
+												key={field.id}
+												className="p-6 rounded-xl border border-border bg-muted/30 space-y-4"
+											>
+												<div className="flex items-center justify-between">
+													<h4 className="font-semibold">Campo {index + 1}</h4>
+													<button
+														onClick={() => {
+															setContent({
+																...content,
+																contactForm: {
+																	...content.contactForm!,
+																	fields: content.contactForm!.fields.filter(
+																		(f) => f.id !== field.id
+																	),
+																},
+															});
+														}}
+														className="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+													>
+														<Trash2 className="w-4 h-4" />
+													</button>
+												</div>
+
+												<div className="grid grid-cols-2 gap-4">
+													{/* Name (ID) */}
+													<div>
+														<label className="block text-xs font-medium mb-1">
+															Nombre (ID)
+														</label>
+														<input
+															type="text"
+															value={field.name}
+															onChange={(e) => {
+																const updatedFields = [
+																	...content.contactForm!.fields,
+																];
+																updatedFields[index] = {
+																	...updatedFields[index],
+																	name: e.target.value,
+																};
+																setContent({
+																	...content,
+																	contactForm: {
+																		...content.contactForm!,
+																		fields: updatedFields,
+																	},
+																});
+															}}
+															className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+														/>
+													</div>
+
+													{/* Label */}
+													<div>
+														<label className="block text-xs font-medium mb-1">
+															Etiqueta
+														</label>
+														<input
+															type="text"
+															value={field.label}
+															onChange={(e) => {
+																const updatedFields = [
+																	...content.contactForm!.fields,
+																];
+																updatedFields[index] = {
+																	...updatedFields[index],
+																	label: e.target.value,
+																};
+																setContent({
+																	...content,
+																	contactForm: {
+																		...content.contactForm!,
+																		fields: updatedFields,
+																	},
+																});
+															}}
+															className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+														/>
+													</div>
+
+													{/* Type */}
+													<div>
+														<label className="block text-xs font-medium mb-1">
+															Tipo
+														</label>
+														<select
+															value={field.type}
+															onChange={(e) => {
+																const updatedFields = [
+																	...content.contactForm!.fields,
+																];
+																updatedFields[index] = {
+																	...updatedFields[index],
+																	type: e.target.value as any,
+																};
+																setContent({
+																	...content,
+																	contactForm: {
+																		...content.contactForm!,
+																		fields: updatedFields,
+																	},
+																});
+															}}
+															className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+														>
+															<option value="text">Texto</option>
+															<option value="email">Email</option>
+															<option value="tel">Teléfono</option>
+															<option value="textarea">Área de texto</option>
+															<option value="select">Selección</option>
+														</select>
+													</div>
+
+													{/* Placeholder */}
+													<div>
+														<label className="block text-xs font-medium mb-1">
+															Placeholder
+														</label>
+														<input
+															type="text"
+															value={field.placeholder || ""}
+															onChange={(e) => {
+																const updatedFields = [
+																	...content.contactForm!.fields,
+																];
+																updatedFields[index] = {
+																	...updatedFields[index],
+																	placeholder: e.target.value,
+																};
+																setContent({
+																	...content,
+																	contactForm: {
+																		...content.contactForm!,
+																		fields: updatedFields,
+																	},
+																});
+															}}
+															className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+														/>
+													</div>
+
+													{/* Order */}
+													<div>
+														<label className="block text-xs font-medium mb-1">
+															Orden
+														</label>
+														<input
+															type="number"
+															value={field.order}
+															onChange={(e) => {
+																const updatedFields = [
+																	...content.contactForm!.fields,
+																];
+																updatedFields[index] = {
+																	...updatedFields[index],
+																	order: parseInt(e.target.value) || 0,
+																};
+																setContent({
+																	...content,
+																	contactForm: {
+																		...content.contactForm!,
+																		fields: updatedFields,
+																	},
+																});
+															}}
+															className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+														/>
+													</div>
+
+													{/* Required */}
+													<div className="flex items-center gap-2">
+														<input
+															type="checkbox"
+															checked={field.required}
+															onChange={(e) => {
+																const updatedFields = [
+																	...content.contactForm!.fields,
+																];
+																updatedFields[index] = {
+																	...updatedFields[index],
+																	required: e.target.checked,
+																};
+																setContent({
+																	...content,
+																	contactForm: {
+																		...content.contactForm!,
+																		fields: updatedFields,
+																	},
+																});
+															}}
+															className="w-4 h-4 rounded border-border"
+														/>
+														<label className="text-xs font-medium">
+															Requerido
+														</label>
+													</div>
+												</div>
+
+												{/* Options para select */}
+												{field.type === "select" && (
+													<div>
+														<label className="block text-xs font-medium mb-1">
+															Opciones (una por línea)
+														</label>
+														<textarea
+															value={field.options?.join("\n") || ""}
+															onChange={(e) => {
+																const updatedFields = [
+																	...content.contactForm!.fields,
+																];
+																updatedFields[index] = {
+																	...updatedFields[index],
+																	options: e.target.value
+																		.split("\n")
+																		.filter((o) => o.trim()),
+																};
+																setContent({
+																	...content,
+																	contactForm: {
+																		...content.contactForm!,
+																		fields: updatedFields,
+																	},
+																});
+															}}
+															rows={3}
+															className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm font-mono"
+														/>
+													</div>
+												)}
+											</div>
+										))}
+									</div>
+								</div>
+							</>
+						)}
+					</div>
+				</motion.section>
+			)}
+
+			{/* Sección: Mensajes Recibidos */}
+			{currentSection === "submissions" && (
+				<motion.section
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.5 }}
+					className="bg-card dark:bg-card rounded-3xl p-8 shadow-modern border border-border/50"
+				>
+					<ContactSubmissions />
+				</motion.section>
+			)}
+
 			{/* Botón de guardar flotante - solo para secciones de contenido */}
-			{currentSection !== "mensajes" && (
+			{currentSection !== "mensajes" && currentSection !== "submissions" && (
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -1468,5 +1877,13 @@ export default function AdminPage() {
 				</motion.div>
 			)}
 		</AdminLayout>
+	);
+}
+
+export default function AdminPage() {
+	return (
+		<ProtectedRoute>
+			<AdminPageContent />
+		</ProtectedRoute>
 	);
 }

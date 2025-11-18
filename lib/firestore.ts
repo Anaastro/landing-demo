@@ -6,6 +6,11 @@ import {
 	collection,
 	DocumentData,
 	Timestamp,
+	addDoc,
+	getDocs,
+	query,
+	orderBy,
+	updateDoc,
 } from "firebase/firestore";
 import {
 	ref,
@@ -13,7 +18,7 @@ import {
 	getDownloadURL,
 	deleteObject,
 } from "firebase/storage";
-import { LandingContent } from "./types";
+import { LandingContent, ContactSubmission } from "./types";
 
 const LANDING_DOC_ID = "main";
 
@@ -193,4 +198,118 @@ export const defaultLandingContent: Omit<LandingContent, "updatedAt"> = {
 			linkedin: "https://linkedin.com",
 		},
 	},
+	contactForm: {
+		enabled: true,
+		title: "Contáctanos",
+		subtitle:
+			"Estamos aquí para ayudarte. Envíanos un mensaje y te responderemos pronto.",
+		buttonText: "Enviar Mensaje",
+		successMessage: "¡Gracias por contactarnos! Te responderemos pronto.",
+		fields: [
+			{
+				id: "1",
+				name: "nombre",
+				label: "Nombre completo",
+				type: "text" as const,
+				placeholder: "Juan Pérez",
+				required: true,
+				order: 1,
+			},
+			{
+				id: "2",
+				name: "email",
+				label: "Correo electrónico",
+				type: "email" as const,
+				placeholder: "juan@ejemplo.com",
+				required: true,
+				order: 2,
+			},
+			{
+				id: "3",
+				name: "telefono",
+				label: "Teléfono",
+				type: "tel" as const,
+				placeholder: "+34 600 000 000",
+				required: false,
+				order: 3,
+			},
+			{
+				id: "4",
+				name: "asunto",
+				label: "Asunto",
+				type: "select" as const,
+				placeholder: "Selecciona un asunto",
+				required: true,
+				options: [
+					"Consulta general",
+					"Soporte técnico",
+					"Ventas",
+					"Partnership",
+					"Otro",
+				],
+				order: 4,
+			},
+			{
+				id: "5",
+				name: "mensaje",
+				label: "Mensaje",
+				type: "textarea" as const,
+				placeholder: "Escribe tu mensaje aquí...",
+				required: true,
+				order: 5,
+			},
+		],
+	},
 };
+
+// Funciones para formulario de contacto
+export async function saveContactSubmission(
+	formData: Record<string, string>
+): Promise<boolean> {
+	try {
+		await addDoc(collection(db, "contact_submissions"), {
+			formData,
+			submittedAt: Timestamp.now(),
+			read: false,
+		});
+		return true;
+	} catch (error) {
+		console.error("Error saving contact submission:", error);
+		return false;
+	}
+}
+
+export async function getContactSubmissions(): Promise<ContactSubmission[]> {
+	try {
+		const q = query(
+			collection(db, "contact_submissions"),
+			orderBy("submittedAt", "desc")
+		);
+		const querySnapshot = await getDocs(q);
+		return querySnapshot.docs.map((doc) => {
+			const data = doc.data();
+			return {
+				id: doc.id,
+				formData: data.formData,
+				submittedAt: data.submittedAt?.toDate() || new Date(),
+				read: data.read || false,
+			};
+		});
+	} catch (error) {
+		console.error("Error getting contact submissions:", error);
+		return [];
+	}
+}
+
+export async function markSubmissionAsRead(
+	submissionId: string
+): Promise<boolean> {
+	try {
+		const docRef = doc(db, "contact_submissions", submissionId);
+		await updateDoc(docRef, { read: true });
+		return true;
+	} catch (error) {
+		console.error("Error marking submission as read:", error);
+		return false;
+	}
+}
