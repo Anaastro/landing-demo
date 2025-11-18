@@ -18,6 +18,8 @@ import {
 	Package,
 	BarChart3,
 	Send,
+	Mail,
+	Inbox,
 } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
@@ -37,6 +39,8 @@ const menuItems = [
 	{ id: "cta", label: "CTA", icon: Megaphone },
 	{ id: "footer", label: "Footer", icon: Settings },
 	{ id: "mensajes", label: "Mensajes Masivos", icon: Send },
+	{ id: "contactForm", label: "Formulario Contacto", icon: Mail },
+	{ id: "submissions", label: "Mensajes Recibidos", icon: Inbox },
 ];
 
 export default function AdminLayout({

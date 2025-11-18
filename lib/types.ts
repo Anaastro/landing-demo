@@ -78,6 +78,33 @@ export interface ProductsSection {
 	products: Product[];
 }
 
+export interface ContactFormField {
+	id: string;
+	name: string;
+	label: string;
+	type: "text" | "email" | "tel" | "textarea" | "select";
+	placeholder?: string;
+	required: boolean;
+	options?: string[];
+	order: number;
+}
+
+export interface ContactFormConfig {
+	enabled: boolean;
+	title: string;
+	subtitle: string;
+	buttonText: string;
+	successMessage: string;
+	fields: ContactFormField[];
+}
+
+export interface ContactSubmission {
+	id?: string;
+	formData: Record<string, string>;
+	submittedAt: Date;
+	read: boolean;
+}
+
 export interface LandingContent {
 	id: string;
 	logo: LogoConfig;
@@ -88,5 +115,6 @@ export interface LandingContent {
 	testimonials: Testimonial[];
 	cta: CTASection;
 	footer: FooterContent;
+	contactForm?: ContactFormConfig;
 	updatedAt: Date;
 }
