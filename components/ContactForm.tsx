@@ -20,12 +20,16 @@ export default function ContactForm({ config }: ContactFormProps) {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+
+		// Prevenir doble envío
+		if (loading) return;
+
 		setLoading(true);
 		setMessage(null);
 
 		// Validar campos requeridos
 		const missingFields = config.fields
-			.filter((field) => field.required && !formData[field.name])
+			.filter((field) => field.required && !formData[field.name]?.trim())
 			.map((field) => field.label);
 
 		if (missingFields.length > 0) {
@@ -37,21 +41,43 @@ export default function ContactForm({ config }: ContactFormProps) {
 			return;
 		}
 
+		// Validar que haya al menos un campo con datos
+		const hasData = Object.keys(formData).some(
+			(key) => formData[key]?.trim().length > 0
+		);
+
+		if (!hasData) {
+			setMessage({
+				type: "error",
+				text: "Por favor completa al menos un campo",
+			});
+			setLoading(false);
+			return;
+		}
+
 		try {
+			console.log("Submitting form data:", formData);
 			const success = await saveContactSubmission(formData);
+
 			if (success) {
 				setMessage({ type: "success", text: config.successMessage });
 				setFormData({});
+
+				// Reset form after 3 seconds
+				setTimeout(() => {
+					setMessage(null);
+				}, 5000);
 			} else {
 				setMessage({
 					type: "error",
-					text: "Error al enviar el mensaje. Intenta de nuevo.",
+					text: "Error al enviar el mensaje. Por favor intenta de nuevo.",
 				});
 			}
 		} catch (error) {
+			console.error("Form submission error:", error);
 			setMessage({
 				type: "error",
-				text: "Error al enviar el mensaje. Intenta de nuevo.",
+				text: "Error al enviar el mensaje. Por favor intenta de nuevo.",
 			});
 		} finally {
 			setLoading(false);

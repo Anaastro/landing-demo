@@ -59,20 +59,61 @@ export async function saveLandingContent(
 	}
 }
 
-// Subir imagen a Storage
+// Subir imagen a Storage con reintentos
 export async function uploadImage(
 	file: File,
-	path: string
+	path: string,
+	retries: number = 3
 ): Promise<string | null> {
-	try {
-		const storageRef = ref(storage, `landing/${path}`);
-		await uploadBytes(storageRef, file);
-		const downloadURL = await getDownloadURL(storageRef);
-		return downloadURL;
-	} catch (error) {
-		console.error("Error uploading image:", error);
-		return null;
+	let lastError: any = null;
+
+	for (let attempt = 0; attempt < retries; attempt++) {
+		try {
+			// Agregar timestamp único para evitar conflictos
+			const uniquePath = `${path}-${Date.now()}`;
+			const storageRef = ref(storage, `landing/${uniquePath}`);
+
+			// Crear blob desde el archivo para evitar problemas con AbortController
+			const blob = new Blob([await file.arrayBuffer()], { type: file.type });
+
+			// Subir con metadata
+			const metadata = {
+				contentType: file.type,
+				customMetadata: {
+					originalName: file.name,
+					uploadedAt: new Date().toISOString(),
+				},
+			};
+
+			await uploadBytes(storageRef, blob, metadata);
+			const downloadURL = await getDownloadURL(storageRef);
+			return downloadURL;
+		} catch (error: any) {
+			lastError = error;
+			console.warn(
+				`Upload attempt ${attempt + 1} failed:`,
+				error?.message || error
+			);
+
+			// Si es un AbortError, esperar un poco antes de reintentar
+			if (error?.name === "AbortError" || error?.code === "ABORT_ERR") {
+				if (attempt < retries - 1) {
+					await new Promise((resolve) =>
+						setTimeout(resolve, 500 * (attempt + 1))
+					);
+					continue;
+				}
+			}
+
+			// Para otros errores, fallar inmediatamente
+			if (error?.name !== "AbortError" && error?.code !== "ABORT_ERR") {
+				break;
+			}
+		}
 	}
+
+	console.error("Error uploading image after retries:", lastError);
+	return null;
 }
 
 // Eliminar imagen de Storage
@@ -267,11 +308,18 @@ export async function saveContactSubmission(
 	formData: Record<string, string>
 ): Promise<boolean> {
 	try {
-		await addDoc(collection(db, "contact_submissions"), {
+		if (!formData || Object.keys(formData).length === 0) {
+			console.error("Form data is empty");
+			return false;
+		}
+
+		const docRef = await addDoc(collection(db, "contact_submissions"), {
 			formData,
 			submittedAt: Timestamp.now(),
 			read: false,
 		});
+
+		console.log("Contact submission saved with ID:", docRef.id);
 		return true;
 	} catch (error) {
 		console.error("Error saving contact submission:", error);
