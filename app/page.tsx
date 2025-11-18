@@ -81,20 +81,22 @@ export default function Home() {
 	}
 
 	return (
-		<div className="min-h-screen bg-background">
-			{/* Navbar fijo */}
+		<div className="min-h-screen bg-background selection:bg-primary/20">
+			{/* Navbar debe tener el z-index más alto de la estructura visual principal */}
 			<Navbar
 				key={`${content.logo.text}-${content.logo.imageUrl}-${content.logo.showImage}`}
 				logo={content.logo}
 			/>
 
-			{/* Botón de tema flotante */}
+			{/* CORRECCIÓN: z-index reducido a 30. 
+          El Navbar suele ser z-40 o z-50, así que este botón debe ser menor 
+          para que el menú móvil lo cubra al abrirse. */}
 			<motion.button
 				onClick={toggleTheme}
 				initial={{ opacity: 0, scale: 0 }}
 				animate={{ opacity: 1, scale: 1 }}
 				transition={{ delay: 1 }}
-				className="fixed top-24 right-6 z-50 p-4 rounded-full bg-card dark:bg-card border border-border shadow-lg hover:scale-110 transition-transform"
+				className="fixed top-24 right-6 z-30 p-4 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-lg hover:scale-110 transition-transform"
 				aria-label="Toggle theme"
 			>
 				{theme === "dark" ? (
@@ -104,15 +106,17 @@ export default function Home() {
 				)}
 			</motion.button>
 
-			{/* Contenido principal */}
-			<Banner content={content.banner} />
-			<Stats stats={content.stats} />
-			<Features features={content.features} />
-			<Products products={content.products} />
-			<Testimonials testimonials={content.testimonials} />
-			<CTAModern content={content.cta} />
-			{content.contactForm && <ContactForm config={content.contactForm} />}
-			<FooterModern content={content.footer} />
+			{/* Contenido principal envuelto en relative z-0 para evitar conflictos de apilamiento */}
+			<main className="relative z-0">
+				<Banner content={content.banner} />
+				<Stats stats={content.stats} />
+				<Features features={content.features} />
+				<Products products={content.products} />
+				<Testimonials testimonials={content.testimonials} />
+				<CTAModern content={content.cta} />
+				{content.contactForm && <ContactForm config={content.contactForm} />}
+				<FooterModern content={content.footer} />
+			</main>
 		</div>
 	);
 }
