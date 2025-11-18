@@ -87,39 +87,6 @@ export default function Banner({ content }: BannerProps) {
 						<ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
 					</a>
 				</motion.div>
-				{/* Acciones rápidas - Ocultas en móvil */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 1.2, duration: 0.5 }}
-					className="hidden sm:flex absolute bottom-10 left-1/2 -translate-x-1/2 gap-3 md:gap-4"
-				>
-					<a
-						href="#features"
-						className="group flex flex-col items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-background/80 dark:bg-card/80 backdrop-blur-xl border border-border/50 hover:border-primary/50 hover:bg-background dark:hover:bg-card transition-all hover:scale-110 shadow-lg"
-					>
-						<span className="text-xl sm:text-2xl">⚡</span>
-						<span className="text-xs font-bold text-foreground dark:text-white">
-							Características
-						</span>
-					</a>
-					<a
-						href="#products"
-						className="group flex flex-col items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-linear-to-br from-primary/90 to-secondary/90 hover:from-primary hover:to-secondary backdrop-blur-xl transition-all hover:scale-110 shadow-lg text-white"
-					>
-						<span className="text-xl sm:text-2xl">💎</span>
-						<span className="text-xs font-bold">Ver Planes</span>
-					</a>
-					<a
-						href="#contacto"
-						className="group flex flex-col items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-background/80 dark:bg-card/80 backdrop-blur-xl border border-border/50 hover:border-secondary/50 hover:bg-background dark:hover:bg-card transition-all hover:scale-110 shadow-lg"
-					>
-						<span className="text-xl sm:text-2xl">📧</span>
-						<span className="text-xs font-bold text-foreground dark:text-white">
-							Contacto
-						</span>
-					</a>
-				</motion.div>
 			</div>
 		</section>
 	);

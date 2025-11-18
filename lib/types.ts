@@ -59,6 +59,11 @@ export interface Product {
 	imageUrl?: string;
 	features: string[];
 	highlighted?: boolean;
+	whatsapp?: {
+		enabled: boolean;
+		phoneNumber: string;
+		message: string;
+	};
 }
 
 export interface StatsSection {

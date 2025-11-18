@@ -183,6 +183,11 @@ export const defaultLandingContent: Omit<LandingContent, "updatedAt"> = {
 				description: "Perfecto para empezar",
 				price: "$29/mes",
 				features: ["5 Usuarios", "10GB Almacenamiento", "Soporte Email"],
+				whatsapp: {
+					enabled: false,
+					phoneNumber: "",
+					message: "Hola, estoy interesado en el plan Básico",
+				},
 			},
 			{
 				id: "2",
@@ -196,6 +201,11 @@ export const defaultLandingContent: Omit<LandingContent, "updatedAt"> = {
 					"API Access",
 				],
 				highlighted: true,
+				whatsapp: {
+					enabled: false,
+					phoneNumber: "",
+					message: "Hola, estoy interesado en el plan Pro",
+				},
 			},
 			{
 				id: "3",
@@ -208,6 +218,11 @@ export const defaultLandingContent: Omit<LandingContent, "updatedAt"> = {
 					"Soporte 24/7",
 					"Gestor Dedicado",
 				],
+				whatsapp: {
+					enabled: false,
+					phoneNumber: "",
+					message: "Hola, estoy interesado en el plan Enterprise",
+				},
 			},
 		],
 	},
