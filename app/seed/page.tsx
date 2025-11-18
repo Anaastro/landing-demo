@@ -65,6 +65,7 @@ export default function SeedPage() {
 				description:
 					"Interfaz moderna y fácil de usar, diseñada pensando en la experiencia del usuario",
 				icon: "🎨",
+				slug: "diseno-intuitivo",
 				imageUrl:
 					"https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
 			},
@@ -74,6 +75,7 @@ export default function SeedPage() {
 				description:
 					"Optimizado para velocidad y eficiencia, manejando miles de operaciones por segundo",
 				icon: "⚡",
+				slug: "alto-rendimiento",
 				imageUrl:
 					"https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
 			},
@@ -83,6 +85,7 @@ export default function SeedPage() {
 				description:
 					"Protección de datos de nivel empresarial con encriptación end-to-end",
 				icon: "🔒",
+				slug: "seguridad-avanzada",
 				imageUrl:
 					"https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80",
 			},
@@ -92,6 +95,7 @@ export default function SeedPage() {
 				description:
 					"Conecta con tus herramientas favoritas mediante APIs potentes y documentadas",
 				icon: "🔌",
+				slug: "integracion-facil",
 			},
 			{
 				id: "5",
@@ -99,6 +103,7 @@ export default function SeedPage() {
 				description:
 					"Dashboard completo con métricas y reportes para tomar decisiones informadas",
 				icon: "📊",
+				slug: "analytics-tiempo-real",
 			},
 			{
 				id: "6",
@@ -106,6 +111,7 @@ export default function SeedPage() {
 				description:
 					"Equipo experto disponible 24/7 para ayudarte cuando lo necesites",
 				icon: "💪",
+				slug: "soporte-premium",
 			},
 		],
 		products: {

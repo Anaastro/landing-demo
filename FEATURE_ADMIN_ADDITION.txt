@@ -1,0 +1,40 @@
+// Añadir después de la línea 1030 en app/admin/page.tsx
+
+							<div className="mt-4">
+								<label className="block text-sm font-medium mb-2">
+									Slug (URL)
+								</label>
+								<input
+									type="text"
+									value={feature.slug || ""}
+									onChange={(e) => {
+										const newFeatures = [...content.features];
+										newFeatures[index].slug = e.target.value
+											.toLowerCase()
+											.replace(/[^a-z0-9]+/g, "-")
+											.replace(/^-|-$/g, "");
+										setContent({ ...content, features: newFeatures });
+									}}
+									placeholder="ejemplo: analisis-avanzado"
+									className="w-full px-4 py-2 border border-border rounded-lg bg-background dark:bg-muted focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
+								/>
+								<p className="text-xs text-muted-foreground mt-1">
+									URL: /feature/{feature.slug || "..."}
+								</p>
+							</div>
+
+							<div className="mt-4">
+								<label className="block text-sm font-medium mb-2">
+									Contenido detallado (página de detalles)
+								</label>
+								<RichTextEditor
+									content={feature.detailedContent || ""}
+									onChange={(html) => {
+										const newFeatures = [...content.features];
+										newFeatures[index].detailedContent = html;
+										setContent({ ...content, features: newFeatures });
+									}}
+									placeholder="Contenido completo de la característica para la página de detalles..."
+									minHeight="200px"
+								/>
+							</div>

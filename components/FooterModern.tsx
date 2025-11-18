@@ -12,6 +12,7 @@ import {
 	Linkedin,
 	Heart,
 } from "lucide-react";
+import RichTextViewer from "./RichTextViewer";
 
 interface FooterProps {
 	content: FooterContent;
@@ -39,9 +40,9 @@ export default function FooterModern({ content }: FooterProps) {
 						<h3 className="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-linear-to-r from-primary to-secondary">
 							{content.companyName}
 						</h3>
-						<p className="text-gray-400 mb-6 leading-relaxed">
-							{content.description}
-						</p>
+						<div className="text-gray-400 mb-6 leading-relaxed">
+							<RichTextViewer content={content.description} />
+						</div>
 						<div className="flex gap-3">
 							{content.socialLinks.facebook && (
 								<a

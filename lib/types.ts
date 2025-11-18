@@ -18,6 +18,8 @@ export interface Feature {
 	description: string;
 	icon: string;
 	imageUrl?: string;
+	slug: string;
+	detailedContent?: string;
 }
 
 export interface Testimonial {
