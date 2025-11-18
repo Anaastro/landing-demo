@@ -156,7 +156,6 @@ export default function MensajesMasivos() {
 	>([]);
 
 	const [loading, setLoading] = useState(false);
-
 	const [statusEnvios, setStatusEnvios] = useState<EnvioStatus[]>([]);
 
 	const [nuevoContacto, setNuevoContacto] = useState({
@@ -179,11 +178,11 @@ export default function MensajesMasivos() {
 
 	const [deletingSelected, setDeletingSelected] = useState(false);
 
-	// 🔹 paginación front
+	// paginación front
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState<number>(50);
 
-	// 🔹 filtro de búsqueda (por número / nombre / apellido)
+	// filtro de búsqueda
 	const [searchTerm, setSearchTerm] = useState<string>("");
 
 	useEffect(() => {
@@ -193,7 +192,6 @@ export default function MensajesMasivos() {
 	const cargarContactos = async () => {
 		setLoading(true);
 		try {
-			// 🔹 IMPORTANTE: aquí SOLO LEEMOS de `formulario`
 			const qy = query(collection(db, "formulario"), orderBy("creado", "desc"));
 			const snapshot = await getDocs(qy);
 			const contactosData: Contacto[] = [];
@@ -240,7 +238,7 @@ export default function MensajesMasivos() {
 		});
 	}, [contactos, searchTerm]);
 
-	/* ----------- Paginación en memoria (sobre los filtrados) ----------- */
+	/* ----------- Paginación ----------- */
 
 	const totalPages = useMemo(
 		() =>
@@ -250,7 +248,6 @@ export default function MensajesMasivos() {
 		[filteredContactos.length, pageSize]
 	);
 
-	// Asegurar que currentPage esté en rango al cambiar filtro o pageSize
 	useEffect(() => {
 		if (currentPage > totalPages) {
 			setCurrentPage(totalPages || 1);
@@ -306,7 +303,6 @@ export default function MensajesMasivos() {
 		}
 	};
 
-	// 🔹 Eliminar contacto SOLO en memoria (no toca Firestore)
 	const eliminarContacto = (id: string) => {
 		const confirmar = confirm(
 			"¿Eliminar este contacto de la lista (solo aquí)?"
@@ -317,7 +313,6 @@ export default function MensajesMasivos() {
 		setContactosSeleccionados((prev) => prev.filter((cid) => cid !== id));
 	};
 
-	// 🔹 Agregar contacto y guardarlo en Firestore
 	const agregarContacto = async () => {
 		const nombre = nuevoContacto.nombre.trim();
 		const apellido = nuevoContacto.apellido.trim();
@@ -345,7 +340,6 @@ export default function MensajesMasivos() {
 		}
 
 		try {
-			// Guardar en Firestore
 			const docRef = await addDoc(collection(db, "formulario"), {
 				nombre,
 				apellido,
@@ -369,7 +363,7 @@ export default function MensajesMasivos() {
 		}
 	};
 
-	/* ----------- Importación masiva y guardado en Firestore ----------- */
+	/* ----------- Importación masiva ----------- */
 
 	const handleImportContacts = async (file: File | null) => {
 		if (!file) return;
@@ -380,7 +374,6 @@ export default function MensajesMasivos() {
 			const parsed = await parseContactsFile(file);
 			const totalLeidos = parsed.length;
 
-			// Duplicados dentro del archivo
 			const seen = new Set<string>();
 			const uniqueFromFile: Contacto[] = [];
 			let omitidosDuplicadosArchivo = 0;
@@ -395,7 +388,6 @@ export default function MensajesMasivos() {
 				uniqueFromFile.push(c);
 			}
 
-			// Duplicados vs contactos ya existentes (por teléfono normalizado)
 			const existingPhones = new Set(
 				contactos.map((c) => normalizePhone(c.telefono))
 			);
@@ -405,7 +397,6 @@ export default function MensajesMasivos() {
 			);
 			const omitidosDuplicadosBD = uniqueFromFile.length - toInsert.length;
 
-			// 🔹 Guardar cada contacto en Firestore
 			let agregados = 0;
 			let errores = 0;
 			const contactosGuardados: Contacto[] = [];
@@ -430,7 +421,6 @@ export default function MensajesMasivos() {
 				}
 			}
 
-			// Agregar al estado local solo los que se guardaron exitosamente
 			setContactos((prev) => [...contactosGuardados, ...prev]);
 
 			setBulkResult({
@@ -455,7 +445,7 @@ export default function MensajesMasivos() {
 		}
 	};
 
-	/* ----------- Selección por rango (página actual) ----------- */
+	/* ----------- Selección por rango ----------- */
 
 	const getIdsInRange = (start: number, end: number): string[] => {
 		const total = visibleContactos.length;
@@ -496,8 +486,6 @@ export default function MensajesMasivos() {
 		const ids = getIdsInRange(s, e);
 		setContactosSeleccionados((prev) => prev.filter((id) => !ids.includes(id)));
 	};
-
-	/* ----------- Eliminar seleccionados (SOLO memoria) ----------- */
 
 	const handleDeleteSelected = () => {
 		if (contactosSeleccionados.length === 0) {
@@ -541,12 +529,10 @@ export default function MensajesMasivos() {
 	/* ===================== UI ===================== */
 
 	return (
-		<div className="space-y-8">
+		<div className="space-y-8 bg-white dark:bg-slate-900 min-h-screen px-4 py-6 md:px-6 lg:px-8 transition-colors">
 			{/* Header */}
-			<div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 shadow-xl">
-				<h1 className="text-4xl font-black text-white mb-2">
-					Mensajes Masivos WhatsApp
-				</h1>
+			<div className="bg-green-600 dark:bg-emerald-700 rounded-2xl p-8 shadow-xl text-white">
+				<h1 className="text-4xl font-black mb-2">Mensajes Masivos WhatsApp</h1>
 				<p className="text-green-100">
 					Envía mensajes personalizados a múltiples contactos
 				</p>
@@ -567,13 +553,15 @@ export default function MensajesMasivos() {
 
 				{/* Lateral derecha */}
 				<div className="space-y-6">
-					<div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 shadow-xl text-white">
+					{/* Card contactos totales */}
+					<div className="rounded-2xl p-6 shadow-xl text-white bg-gradient-to-br from-green-500 to-emerald-600">
 						<Users className="w-12 h-12 mb-4 opacity-80" />
 						<p className="text-sm font-bold opacity-90">Contactos totales</p>
 						<p className="text-4xl font-black">{contactos.length}</p>
 					</div>
 
-					<div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 shadow-xl text-white">
+					{/* Card seleccionados */}
+					<div className="rounded-2xl p-6 shadow-xl text-white bg-gradient-to-br from-blue-500 to-indigo-600">
 						<Send className="w-12 h-12 mb-4 opacity-80" />
 						<p className="text-sm font-bold opacity-90">Seleccionados</p>
 						<p className="text-4xl font-black">
@@ -581,10 +569,13 @@ export default function MensajesMasivos() {
 						</p>
 					</div>
 
-					<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+					{/* Info */}
+					<div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-black dark:border-slate-700">
 						<AlertCircle className="w-8 h-8 text-amber-500 mb-3" />
-						<p className="text-xs font-bold text-gray-700 mb-2">Importante:</p>
-						<ul className="text-xs text-gray-600 space-y-1">
+						<p className="text-xs font-bold text-black dark:text-gray-100 mb-2">
+							Importante:
+						</p>
+						<ul className="text-xs text-black dark:text-gray-300 space-y-1">
 							<li>• Verifica los números antes de enviar</li>
 							<li>• No envíes spam</li>
 							<li>• Respeta el delay configurado</li>
@@ -594,10 +585,10 @@ export default function MensajesMasivos() {
 			</div>
 
 			{/* Agregar contacto */}
-			<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-				<h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+			<div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-black dark:border-slate-700">
+				<h3 className="text-lg font-bold text-black dark:text-gray-100 mb-4 flex items-center gap-2">
 					<Plus className="w-5 h-5" />
-					Agregar contacto manualmente (solo en esta vista)
+					Agregar contacto manualmente
 				</h3>
 				<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 					<input
@@ -607,7 +598,7 @@ export default function MensajesMasivos() {
 						onChange={(e) =>
 							setNuevoContacto({ ...nuevoContacto, nombre: e.target.value })
 						}
-						className="p-3 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none"
+						className="p-3 border-2 border-black dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 text-black dark:text-gray-100 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none"
 					/>
 					<input
 						type="text"
@@ -616,7 +607,7 @@ export default function MensajesMasivos() {
 						onChange={(e) =>
 							setNuevoContacto({ ...nuevoContacto, apellido: e.target.value })
 						}
-						className="p-3 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none"
+						className="p-3 border-2 border-black dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 text-black dark:text-gray-100 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none"
 					/>
 					<input
 						type="text"
@@ -625,7 +616,7 @@ export default function MensajesMasivos() {
 						onChange={(e) =>
 							setNuevoContacto({ ...nuevoContacto, telefono: e.target.value })
 						}
-						className="p-3 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none"
+						className="p-3 border-2 border-black dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 text-black dark:text-gray-100 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none"
 					/>
 					<button
 						onClick={agregarContacto}
@@ -638,15 +629,15 @@ export default function MensajesMasivos() {
 			</div>
 
 			{/* Importar contactos desde Excel/CSV */}
-			<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-				<h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+			<div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-black dark:border-slate-700">
+				<h3 className="text-lg font-bold text-black dark:text-gray-100 mb-4 flex items-center gap-2">
 					<FileText className="w-5 h-5" />
-					Importar contactos desde Excel/CSV (solo en memoria)
+					Importar contactos desde Excel/CSV
 				</h3>
 
 				<div className="flex flex-col gap-3">
-					<div className="flex items-center gap-3">
-						<label className="inline-flex items-center justify-center px-4 py-2 rounded-xl font-bold shadow border-2 border-gray-300 hover:border-gray-400 cursor-pointer">
+					<div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+						<label className="inline-flex items-center justify-center px-4 py-2 rounded-xl font-bold shadow border-2 border-black dark:border-slate-600 hover:border-black dark:hover:border-slate-400 cursor-pointer bg-white dark:bg-slate-900 text-black dark:text-gray-100">
 							<input
 								type="file"
 								accept=".xlsx,.xls,.csv"
@@ -659,19 +650,18 @@ export default function MensajesMasivos() {
 							<Paperclip className="w-5 h-5 mr-2" />
 							{bulkUploading ? "Procesando..." : "Seleccionar archivo"}
 						</label>
-						<p className="text-xs text-gray-600">
+						<p className="text-xs text-black dark:text-gray-300">
 							Columnas recomendadas: <code>nombre</code>, <code>apellido</code>,{" "}
 							<code>telefono</code>. Se aceptan variantes como{" "}
 							<em>tel, phone, celular, whatsapp</em>.
 						</p>
 					</div>
 
-					{/* Botones de plantilla */}
 					<div className="flex flex-wrap items-center gap-3">
 						<button
 							type="button"
 							onClick={downloadTemplateCSV}
-							className="px-4 py-2 rounded-xl font-bold shadow border-2 border-gray-300 hover:border-gray-400"
+							className="px-4 py-2 rounded-xl font-bold shadow border-2 border-black dark:border-slate-600 hover:border-black dark:hover:border-slate-400 bg-white dark:bg-slate-900 text-black dark:text-gray-100"
 						>
 							Descargar plantilla (CSV)
 						</button>
@@ -679,25 +669,25 @@ export default function MensajesMasivos() {
 						<button
 							type="button"
 							onClick={downloadTemplateXLSX}
-							className="px-4 py-2 rounded-xl font-bold shadow border-2 border-gray-300 hover:border-gray-400"
+							className="px-4 py-2 rounded-xl font-bold shadow border-2 border-black dark:border-slate-600 hover:border-black dark:hover:border-slate-400 bg-white dark:bg-slate-900 text-black dark:text-gray-100"
 						>
 							Descargar plantilla (XLSX)
 						</button>
 
-						<p className="text-xs text-gray-600">
+						<p className="text-xs text-black dark:text-gray-300">
 							La plantilla incluye <code>+59165258002</code> como ejemplo.
 						</p>
 					</div>
 				</div>
 
 				{bulkResult && (
-					<div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm">
-						<p className="font-bold text-gray-800 mb-1">
+					<div className="mt-4 bg-white dark:bg-slate-900 border border-black dark:border-slate-700 rounded-xl p-4 text-sm">
+						<p className="font-bold text-black dark:text-gray-100 mb-1">
 							Resumen de importación
 						</p>
-						<ul className="text-gray-700 space-y-1">
+						<ul className="text-black dark:text-gray-200 space-y-1">
 							<li>Leídos del archivo: {bulkResult.totalLeidos}</li>
-							<li>Agregados (solo en esta vista): {bulkResult.agregados}</li>
+							<li>Agregados: {bulkResult.agregados}</li>
 							<li>
 								Omitidos (duplicados en archivo):{" "}
 								{bulkResult.omitidosDuplicadosArchivo}
@@ -714,24 +704,23 @@ export default function MensajesMasivos() {
 				)}
 			</div>
 
-			{/* Lista de contactos + búsqueda + selección por rango + paginación */}
-			<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-				{/* Header de lista */}
+			{/* Lista de contactos */}
+			<div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-black dark:border-slate-700">
 				<div className="flex flex-wrap items-center justify-between mb-4 gap-4">
 					<div>
-						<h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+						<h3 className="text-lg font-bold text-black dark:text-gray-100 flex items-center gap-2">
 							<Users className="w-5 h-5" />
 							Contactos filtrados ({filteredContactos.length})
 						</h3>
-						<p className="text-xs text-gray-500">
+						<p className="text-xs text-black dark:text-gray-400">
 							Mostrando {visibleContactos.length} en la página {currentPage} de{" "}
 							{totalPages}
 						</p>
 					</div>
 
 					{/* Buscador */}
-					<div className="flex items-center gap-2 bg-gray-100 rounded-xl px-3 py-2 w-full max-w-xs">
-						<Search className="w-4 h-4 text-gray-400" />
+					<div className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-xl px-3 py-2 w-full max-w-xs border border-black dark:border-slate-700">
+						<Search className="w-4 h-4 text-black dark:text-gray-500" />
 						<input
 							type="text"
 							value={searchTerm}
@@ -740,18 +729,18 @@ export default function MensajesMasivos() {
 								setCurrentPage(1);
 							}}
 							placeholder="Buscar por nombre o teléfono..."
-							className="bg-transparent outline-none text-sm flex-1"
+							className="bg-transparent outline-none text-sm flex-1 text-black dark:text-gray-100 placeholder:text-black/60 dark:placeholder:text-gray-500"
 						/>
 					</div>
 
-					{/* Page size + paginación */}
-					<div className="flex items-center gap-3">
+					{/* Paginación */}
+					<div className="flex flex-wrap items-center gap-3">
 						<div className="flex items-center gap-1 text-sm">
-							<span className="text-gray-600">Por página:</span>
+							<span className="text-black dark:text-gray-300">Por página:</span>
 							<select
 								value={pageSize}
 								onChange={(e) => handleChangePageSize(Number(e.target.value))}
-								className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
+								className="border border-black dark:border-slate-600 rounded-lg px-2 py-1 text-sm bg-white dark:bg-slate-900 text-black dark:text-gray-100"
 							>
 								<option value={25}>25</option>
 								<option value={50}>50</option>
@@ -764,17 +753,17 @@ export default function MensajesMasivos() {
 							<button
 								onClick={handlePrevPage}
 								disabled={!canGoPrev || loading}
-								className="px-3 py-1 rounded-xl border border-gray-300 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+								className="px-3 py-1 rounded-xl border border-black dark:border-slate-600 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-slate-900 bg-white dark:bg-slate-900 text-black dark:text-gray-100"
 							>
 								Anterior
 							</button>
-							<span className="text-sm text-gray-600">
+							<span className="text-sm text-black dark:text-gray-300">
 								{currentPage}/{totalPages}
 							</span>
 							<button
 								onClick={handleNextPage}
 								disabled={!canGoNext || loading}
-								className="px-3 py-1 rounded-xl border border-gray-300 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+								className="px-3 py-1 rounded-xl border border-black dark:border-slate-600 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-slate-900 bg-white dark:bg-slate-900 text-black dark:text-gray-100"
 							>
 								Siguiente
 							</button>
@@ -782,7 +771,7 @@ export default function MensajesMasivos() {
 
 						<button
 							onClick={toggleTodos}
-							className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+							className="text-sm font-semibold text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
 						>
 							{allVisibleSelected
 								? "Deseleccionar visibles"
@@ -791,69 +780,74 @@ export default function MensajesMasivos() {
 					</div>
 				</div>
 
-				{/* Controles de selección por rango (página actual) */}
+				{/* Controles de rango */}
 				{visibleContactos.length > 0 && (
 					<div className="mb-4 flex flex-wrap items-center gap-3">
 						<div className="flex items-center gap-2">
-							<label className="text-xs text-gray-600">Desde #</label>
+							<label className="text-xs text-black dark:text-gray-300">
+								Desde #
+							</label>
 							<input
 								type="number"
 								min={1}
 								max={visibleContactos.length}
 								value={rangeStart}
 								onChange={(e) => setRangeStart(e.target.value)}
-								className="w-24 px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-sm"
+								className="w-24 px-3 py-2 rounded-xl border border-black dark:border-slate-600 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-sm text-black dark:text-gray-100"
 								placeholder="1"
 							/>
 						</div>
 						<div className="flex items-center gap-2">
-							<label className="text-xs text-gray-600">Hasta #</label>
+							<label className="text-xs text-black dark:text-gray-300">
+								Hasta #
+							</label>
 							<input
 								type="number"
 								min={1}
 								max={visibleContactos.length}
 								value={rangeEnd}
 								onChange={(e) => setRangeEnd(e.target.value)}
-								className="w-24 px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-sm"
+								className="w-24 px-3 py-2 rounded-xl border border-black dark:border-slate-600 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-sm text-black dark:text-gray-100"
 								placeholder={String(visibleContactos.length)}
 							/>
 						</div>
 
 						<button
 							onClick={handleSelectRange}
-							className="px-4 py-2 rounded-2xl border border-gray-300 font-semibold hover:bg-green-50 transition"
+							className="px-4 py-2 rounded-2xl border border-black dark:border-slate-600 font-semibold hover:bg-green-50 dark:hover:bg-emerald-900/40 transition text-black dark:text-gray-100 bg-white dark:bg-slate-900"
 						>
 							Seleccionar rango
 						</button>
 						<button
 							onClick={handleDeselectRange}
-							className="px-4 py-2 rounded-2xl border border-gray-300 font-semibold hover:bg-amber-50 transition"
+							className="px-4 py-2 rounded-2xl border border-black dark:border-slate-600 font-semibold hover:bg-amber-50 dark:hover:bg-amber-900/40 transition text-black dark:text-gray-100 bg-white dark:bg-slate-900"
 						>
 							Quitar selección (rango)
 						</button>
 						<button
 							onClick={handleDeleteSelected}
 							disabled={deletingSelected || contactosSeleccionados.length === 0}
-							className="px-4 py-2 rounded-2xl border border-red-300 text-red-600 font-semibold hover:bg-red-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+							className="px-4 py-2 rounded-2xl border border-black dark:border-red-600 text-red-700 dark:text-red-400 font-semibold hover:bg-red-50 dark:hover:bg-red-900/40 transition disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-slate-900"
 						>
 							{deletingSelected ? "Eliminando..." : "Eliminar seleccionados"}
 						</button>
 
-						<span className="text-xs text-gray-500">
+						<span className="text-xs text-black dark:text-gray-400">
 							Los números (#1, #2, …) son relativos a la página filtrada actual.
 						</span>
 					</div>
 				)}
 
+				{/* Lista */}
 				{loading ? (
 					<div className="flex justify-center py-12">
-						<div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-green-600"></div>
+						<div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-green-600" />
 					</div>
 				) : visibleContactos.length === 0 ? (
-					<div className="text-center py-12 text-gray-500">
+					<div className="text-center py-12 text-black dark:text-gray-400">
 						{searchTerm
 							? "No se encontraron contactos con ese criterio."
-							: "No hay contactos. Se mostrarán los de Firestore (formulario) si existen, o puedes agregar/importar en esta vista (solo en memoria)."}
+							: "No hay contactos. Se mostrarán los de Firestore (formulario) si existen, o puedes agregar/importar en esta vista."}
 					</div>
 				) : (
 					<div className="space-y-3 max-h-96 overflow-y-auto pr-1">
@@ -866,20 +860,19 @@ export default function MensajesMasivos() {
 									key={contacto.id}
 									className={[
 										"group flex items-center gap-4 p-4 rounded-2xl border transition-all",
-										"bg-white",
+										"bg-white dark:bg-slate-900",
 										isChecked
-											? "border-emerald-500 ring-2 ring-emerald-200/60 bg-emerald-50"
-											: "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/30",
+											? "border-black dark:border-emerald-500 ring-2 ring-emerald-200/60 bg-emerald-50 dark:bg-emerald-900/40"
+											: "border-black dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-400 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/20",
 									].join(" ")}
 								>
-									{/* Nº enumerado */}
+									{/* Nº */}
 									<div className="w-10 text-center">
-										<span className="inline-block text-xs font-bold text-gray-700 bg-gray-200/70 group-hover:bg-gray-300 rounded-full px-2 py-1">
+										<span className="inline-block text-xs font-bold text-black dark:text-gray-100 bg-gray-200/70 dark:bg-slate-700 group-hover:bg-gray-300 dark:group-hover:bg-slate-600 rounded-full px-2 py-1">
 											#{numero}
 										</span>
 									</div>
 
-									{/* Checkbox */}
 									<input
 										type="checkbox"
 										checked={isChecked}
@@ -888,20 +881,18 @@ export default function MensajesMasivos() {
 										aria-label={`Seleccionar contacto #${numero}`}
 									/>
 
-									{/* Datos */}
 									<div className="flex-1 min-w-0">
-										<p className="font-semibold text-gray-900 truncate">
+										<p className="font-semibold text-black dark:text-gray-100 truncate">
 											{contacto.nombre} {contacto.apellido}
 										</p>
-										<p className="text-sm text-gray-600">
+										<p className="text-sm text-black dark:text-gray-300">
 											+{contacto.telefono}
 										</p>
 									</div>
 
-									{/* Eliminar individual (solo local) */}
 									<button
 										onClick={() => eliminarContacto(contacto.id)}
-										className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+										className="p-2 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/40 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 									>
 										<Trash2 className="w-5 h-5" />
 									</button>
@@ -914,8 +905,8 @@ export default function MensajesMasivos() {
 
 			{/* Estado de envíos */}
 			{statusEnvios.length > 0 && (
-				<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-					<h3 className="text-lg font-bold text-gray-800 mb-4">
+				<div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-black dark:border-slate-700">
+					<h3 className="text-lg font-bold text-black dark:text-gray-100 mb-4">
 						Estado de envíos
 					</h3>
 					<div className="space-y-2 max-h-96 overflow-y-auto">
@@ -924,26 +915,30 @@ export default function MensajesMasivos() {
 								key={i}
 								className={`flex items-center gap-4 p-4 rounded-xl border ${
 									status.estado === "exitoso"
-										? "bg-green-50 border-green-400"
+										? "bg-green-50 dark:bg-emerald-900/30 border-black dark:border-emerald-500"
 										: status.estado === "error"
-										? "bg-red-50 border-red-400"
+										? "bg-red-50 dark:bg-red-900/30 border-black dark:border-red-500"
 										: status.estado === "enviando"
-										? "bg-blue-50 border-blue-400"
-										: "bg-gray-50 border-gray-300"
+										? "bg-blue-50 dark:bg-blue-900/30 border-black dark:border-blue-500"
+										: "bg-gray-50 dark:bg-slate-900 border-black dark:border-slate-600"
 								}`}
 							>
 								<div className="flex-1">
-									<p className="font-bold text-gray-800">{status.nombre}</p>
-									<p className="text-sm text-gray-600">+{status.telefono}</p>
+									<p className="font-bold text-black dark:text-gray-100">
+										{status.nombre}
+									</p>
+									<p className="text-sm text-black dark:text-gray-300">
+										+{status.telefono}
+									</p>
 									{status.mensaje && (
-										<p className="text-xs text-gray-500 mt-1">
+										<p className="text-xs text-black dark:text-gray-400 mt-1">
 											{status.mensaje}
 										</p>
 									)}
 								</div>
 								<div>
 									{status.estado === "pendiente" && (
-										<div className="w-6 h-6 rounded-full border-2 border-gray-400" />
+										<div className="w-6 h-6 rounded-full border-2 border-black dark:border-gray-500" />
 									)}
 									{status.estado === "enviando" && (
 										<div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-600" />
