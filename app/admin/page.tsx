@@ -44,8 +44,32 @@ function AdminPageContent() {
 	}
 
 	async function handleImageUpload(file: File, path: string): Promise<string> {
-		const url = await uploadImage(file, path);
-		return url || "";
+		const loadingToast = {
+			type: "success" as const,
+			text: "⏳ Subiendo imagen...",
+		};
+		setMessage(loadingToast);
+
+		try {
+			const url = await uploadImage(file, path);
+			if (url) {
+				setMessage({ type: "success", text: "✓ Imagen subida correctamente" });
+				setTimeout(() => setMessage(null), 2000);
+				return url;
+			} else {
+				setMessage({
+					type: "error",
+					text: "✗ Error al subir la imagen. Intenta de nuevo.",
+				});
+				setTimeout(() => setMessage(null), 3000);
+				return "";
+			}
+		} catch (error) {
+			console.error("Upload error:", error);
+			setMessage({ type: "error", text: "✗ Error al subir la imagen" });
+			setTimeout(() => setMessage(null), 3000);
+			return "";
+		}
 	}
 
 	async function handleSave() {
@@ -1454,30 +1478,82 @@ function AdminPageContent() {
 						Configuración del Formulario de Contacto
 					</h2>
 
-					<div className="space-y-8">
-						{/* Toggle Enabled */}
-						<div className="flex items-center gap-3">
-							<input
-								type="checkbox"
-								checked={content.contactForm?.enabled || false}
-								onChange={(e) => {
-									if (!content.contactForm) return;
+					{!content.contactForm ? (
+						<div className="text-center py-12">
+							<p className="text-muted-foreground mb-6">
+								El formulario de contacto no está configurado aún.
+							</p>
+							<button
+								onClick={() => {
 									setContent({
 										...content,
 										contactForm: {
-											...content.contactForm,
-											enabled: e.target.checked,
+											enabled: true,
+											title: "Contáctanos",
+											subtitle:
+												"Estamos aquí para ayudarte. Envíanos un mensaje y te responderemos pronto.",
+											buttonText: "Enviar Mensaje",
+											successMessage:
+												"¡Gracias por contactarnos! Te responderemos pronto.",
+											fields: [
+												{
+													id: Date.now().toString(),
+													name: "nombre",
+													label: "Nombre completo",
+													type: "text" as const,
+													placeholder: "Juan Pérez",
+													required: true,
+													order: 1,
+												},
+												{
+													id: (Date.now() + 1).toString(),
+													name: "email",
+													label: "Correo electrónico",
+													type: "email" as const,
+													placeholder: "juan@ejemplo.com",
+													required: true,
+													order: 2,
+												},
+												{
+													id: (Date.now() + 2).toString(),
+													name: "mensaje",
+													label: "Mensaje",
+													type: "textarea" as const,
+													placeholder: "Escribe tu mensaje aquí...",
+													required: true,
+													order: 3,
+												},
+											],
 										},
 									});
 								}}
-								className="w-5 h-5 rounded border-border"
-							/>
-							<label className="text-sm font-medium">
-								Mostrar formulario de contacto
-							</label>
+								className="px-6 py-3 rounded-xl bg-primary text-white hover:bg-primary-dark transition-colors"
+							>
+								Crear Formulario de Contacto
+							</button>
 						</div>
-
-						{content.contactForm && (
+					) : (
+						<div className="space-y-8">
+							{/* Toggle Enabled */}
+							<div className="flex items-center gap-3">
+								<input
+									type="checkbox"
+									checked={content.contactForm.enabled}
+									onChange={(e) => {
+										setContent({
+											...content,
+											contactForm: {
+												...content.contactForm!,
+												enabled: e.target.checked,
+											},
+										});
+									}}
+									className="w-5 h-5 rounded border-border"
+								/>
+								<label className="text-sm font-medium">
+									Mostrar formulario de contacto
+								</label>
+							</div>
 							<>
 								{/* Título */}
 								<div>
@@ -1832,8 +1908,8 @@ function AdminPageContent() {
 									</div>
 								</div>
 							</>
-						)}
-					</div>
+						</div>
+					)}
 				</motion.section>
 			)}
 
